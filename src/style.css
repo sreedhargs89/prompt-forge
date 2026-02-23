@@ -14,6 +14,7 @@
   --error: #dc2626;
   --font: 'Inter', -apple-system, sans-serif;
   --radius: 8px;
+  color-scheme: light;
 }
 
 *,
@@ -31,6 +32,17 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Selection ──────────────────────────────────── */
+::selection {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+::-moz-selection {
+  background: var(--accent);
+  color: #ffffff;
 }
 
 /* ─── Header ─────────────────────────────────────── */
@@ -104,10 +116,11 @@ body {
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 6px 10px;
-  color: var(--text);
+  color: #1a1a2e;
   font-family: var(--font);
   font-size: 0.85rem;
   outline: none;
+  -webkit-text-fill-color: #1a1a2e;
 }
 
 .api-key-input:focus {
@@ -176,13 +189,14 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 12px;
-  color: var(--text);
+  color: #1a1a2e;
   font-family: var(--font);
   font-size: 0.9rem;
   line-height: 1.6;
   resize: vertical;
   outline: none;
   transition: border-color 0.15s;
+  -webkit-text-fill-color: #1a1a2e;
 }
 
 .textarea:focus {
@@ -199,12 +213,13 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  color: var(--text);
+  color: #1a1a2e;
   font-family: var(--font);
   font-size: 0.85rem;
   cursor: pointer;
   outline: none;
   appearance: none;
+  -webkit-text-fill-color: #1a1a2e;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238e8ea0' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
@@ -216,7 +231,7 @@ body {
 
 .select-field option {
   background: #fff;
-  color: var(--text);
+  color: #1a1a2e;
 }
 
 .input-field {
@@ -226,10 +241,11 @@ body {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  color: var(--text);
+  color: #1a1a2e;
   font-family: var(--font);
   font-size: 0.85rem;
   outline: none;
+  -webkit-text-fill-color: #1a1a2e;
 }
 
 .input-field:focus {
@@ -259,6 +275,7 @@ body {
   font-size: 0.85rem;
   transition: all 0.15s;
   user-select: none;
+  color: #1a1a2e;
 }
 
 .radio-item:hover {
@@ -313,6 +330,7 @@ body {
   font-size: 0.85rem;
   transition: all 0.15s;
   user-select: none;
+  color: #1a1a2e;
 }
 
 .checkbox-item:hover {
