@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Prompt Forge – Transform rough ideas into powerful LLM prompts" />
+  <title>Prompt Forge ✦</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+
+<body>
+  <!-- API Key Bar (inline, not a modal) -->
+  <div id="apiKeyBar" class="api-key-bar">
+    <span class="api-key-label">🔑 OpenAI API Key</span>
+    <input type="password" id="apiKeyInput" placeholder="sk-..." class="api-key-input" />
+    <button id="saveApiKey" class="btn btn-sm">Save</button>
+    <span id="apiKeyStatus" class="api-key-status"></span>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">✦</span>
+        <span class="logo-text">Prompt Forge</span>
+      </div>
+      <div class="header-actions">
+        <button id="historyBtn" class="btn btn-ghost">📦 Archive</button>
+        <button id="settingsBtn" class="btn btn-ghost">🔑</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Single Page Form -->
+  <main class="main-content">
+
+    <!-- 1. Question -->
+    <section class="form-section">
+      <label class="section-label">Your Question</label>
+      <textarea id="userQuestion" class="textarea"
+        placeholder="What do you want to ask? e.g. How does Kubernetes networking work?" rows="3"></textarea>
+    </section>
+
+    <!-- 2. Category (radio buttons) -->
+    <section class="form-section">
+      <label class="section-label">Category</label>
+      <div id="categoryList" class="radio-group"></div>
+    </section>
+
+    <!-- 3. Subcategory (radio buttons, appears after category) -->
+    <section id="subcategorySection" class="form-section hidden">
+      <label class="section-label">Subcategory</label>
+      <div id="subcategoryList" class="radio-group"></div>
+    </section>
+
+    <!-- LinkedIn context (appears only for LinkedIn category) -->
+    <section id="linkedinSection" class="form-section hidden">
+      <label class="section-label">📋 Job Description / Context</label>
+      <textarea id="contextTextarea" class="textarea"
+        placeholder="Paste the job description, LinkedIn profile, or any relevant context here..." rows="3"></textarea>
+    </section>
+
+    <!-- 4. Modifiers (checkboxes, appears after subcategory) -->
+    <section id="modifiersSection" class="form-section hidden">
+      <label class="section-label">Refine <span class="hint">(select all that apply)</span></label>
+      <div id="modifiersList" class="checkbox-group"></div>
+    </section>
+
+    <!-- 5. Role (optional dropdown) -->
+    <section id="roleSection" class="form-section hidden">
+      <label class="section-label">LLM Role <span class="hint">(optional)</span></label>
+      <select id="roleSelect" class="select-field">
+        <option value="">— No specific role —</option>
+        <option value="Technical Architect">Technical Architect</option>
+        <option value="Senior Software Engineer">Senior Software Engineer</option>
+        <option value="Product Manager">Product Manager</option>
+        <option value="Data Scientist">Data Scientist</option>
+        <option value="UX Designer">UX Designer</option>
+        <option value="Business Analyst">Business Analyst</option>
+        <option value="Teacher / Educator">Teacher / Educator</option>
+        <option value="Career Coach">Career Coach</option>
+        <option value="Marketing Expert">Marketing Expert</option>
+        <option value="Psychologist">Psychologist</option>
+      </select>
+      <input type="text" id="customRole" class="input-field" placeholder="Or type a custom role..." />
+    </section>
+
+    <!-- Build Button -->
+    <section class="form-section build-section">
+      <button id="buildBtn" class="btn btn-primary btn-build">
+        ✨ Build My Prompt
+      </button>
+    </section>
+
+    <!-- Output -->
+    <section id="outputSection" class="form-section output-section hidden">
+      <label class="section-label">Your Crafted Prompt</label>
+      <div id="loadingSpinner" class="loading hidden">
+        <div class="spinner"></div>
+        <span>Crafting your prompt...</span>
+      </div>
+      <div id="outputContent" class="hidden">
+        <pre id="generatedPrompt" class="output-box"></pre>
+        <div class="output-actions">
+          <button id="copyBtn" class="btn btn-sm">📋 Copy</button>
+          <button id="saveBtn" class="btn btn-sm">💾 Save</button>
+          <button id="regenerateBtn" class="btn btn-sm">🔄 Regenerate</button>
+        </div>
+      </div>
+      <div id="errorBox" class="error-box hidden"></div>
+    </section>
+  </main>
+
+  <!-- Archive Drawer -->
+  <div id="archiveOverlay" class="archive-overlay hidden"></div>
+  <aside id="archiveDrawer" class="archive-drawer hidden">
+    <div class="drawer-header">
+      <h3>📦 Archive</h3>
+      <button id="closeDrawer" class="btn btn-ghost">✕</button>
+    </div>
+    <div id="archiveList" class="archive-list">
+      <p class="empty-msg">No saved prompts yet.</p>
+    </div>
+  </aside>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
