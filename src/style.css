@@ -139,6 +139,34 @@ body {
   padding: 24px 20px 80px;
 }
 
+/* ─── Hero Section ───────────────────────────────── */
+.hero-section {
+  text-align: center;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.hero-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.hero-desc {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  max-width: 540px;
+  margin: 0 auto;
+}
+
 /* ─── Form Sections ──────────────────────────────── */
 .form-section {
   margin-bottom: 20px;
