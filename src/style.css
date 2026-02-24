@@ -167,6 +167,23 @@ body {
   margin: 0 auto;
 }
 
+.hero-title-link {
+  text-decoration: none;
+  display: inline-block;
+  transition: transform 0.2s, filter 0.2s;
+}
+
+.hero-title-link:hover {
+  transform: scale(1.02);
+  filter: brightness(1.15);
+}
+
+.hero-title-link:hover .hero-title {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(91, 63, 217, 0.3);
+}
+
 /* ─── Quick Build Items ──────────────────────────── */
 .quick-build-item {
   flex: 1 1 calc(50% - 8px);
