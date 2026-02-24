@@ -477,14 +477,10 @@ async function buildPrompt() {
     return;
   }
   if (!state.selectedCategory) {
-    showToast('Select a category');
-    return;
-  }
-  if (!state.apiKey) {
-    apiKeyBar.classList.remove('hidden');
-    apiKeyInput.focus();
-    showToast('Enter your OpenAI API key first');
-    return;
+    if (!state.activeQuickBuild) {
+      showToast('Select a category or a Quick Build preset');
+      return;
+    }
   }
 
   // Show loading
@@ -494,6 +490,258 @@ async function buildPrompt() {
   errorBox.classList.add('hidden');
   outputSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
+  if (state.apiKey) {
+    // ── API Mode ──
+    await buildWithAPI();
+  } else {
+    // ── Local Mode (no API key) ──
+    // Small delay to feel intentional
+    await new Promise((r) => setTimeout(r, 400));
+    buildLocally();
+  }
+}
+
+// ─── Local Prompt Generation ────────────────────────
+function buildLocally() {
+  const prompt = generateLocalPrompt();
+  state.generatedPrompt = prompt;
+  generatedPrompt.textContent = prompt;
+  loadingSpinner.classList.add('hidden');
+  outputContent.classList.remove('hidden');
+
+  // Show API key nudge
+  showApiKeyNudge();
+}
+
+function showApiKeyNudge() {
+  let nudge = document.getElementById('apiKeyNudge');
+  if (!nudge) {
+    nudge = document.createElement('div');
+    nudge.id = 'apiKeyNudge';
+    nudge.className = 'api-nudge';
+    outputContent.appendChild(nudge);
+  }
+  nudge.innerHTML = `💡 <strong>This prompt was built locally.</strong> Add your <a href="#" id="nudgeApiLink">OpenAI API key</a> to get AI-enhanced, personalized prompts tailored to your exact question.`;
+  nudge.classList.remove('hidden');
+
+  // Wire up the link
+  document.getElementById('nudgeApiLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    apiKeyBar.classList.remove('hidden');
+    apiKeyInput.focus();
+  });
+}
+
+function hideApiKeyNudge() {
+  const nudge = document.getElementById('apiKeyNudge');
+  if (nudge) nudge.classList.add('hidden');
+}
+
+function generateLocalPrompt() {
+  const q = state.question.trim();
+  const role = state.customRole || state.selectedRole;
+  const cat = state.selectedCategory;
+  const sub = state.selectedSubcategory;
+  const mods = state.selectedModifiers;
+
+  let prompt = '';
+
+  // Start with role if set
+  if (role) {
+    prompt += `Act as a ${role}.\n\n`;
+  }
+
+  // Build the core instruction based on subcategory
+  const subId = sub?.id || '';
+  switch (subId) {
+    // ── Technology ──
+    case 'first-principles':
+      prompt += `Explain the following topic from first principles, starting from the absolute basics and building up to advanced understanding:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      if (mods.includes('Explain from scratch')) prompt += `- Start from zero assumptions — explain as if the reader has no prior knowledge\n`;
+      if (mods.includes("ELI5 (Explain Like I'm 5)")) prompt += `- Use simple, everyday language that a 5-year-old could understand\n`;
+      if (mods.includes('Use analogies')) prompt += `- Use real-world analogies to make abstract concepts tangible\n`;
+      if (mods.includes('Include visual descriptions')) prompt += `- Include visual descriptions or ASCII diagrams where helpful\n`;
+      if (mods.includes('Provide real-world examples')) prompt += `- Provide concrete real-world examples and use cases\n`;
+      if (mods.length === 0) prompt += `- Explain from scratch with clear examples and analogies\n- Include visual descriptions where helpful\n- Build from simple to complex progressively\n`;
+      break;
+
+    case 'code-generation':
+      prompt += `Write production-quality code for the following:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      if (mods.includes('Specify language/framework')) prompt += `- Clearly specify and use the most appropriate language/framework\n`;
+      if (mods.includes('Add inline comments')) prompt += `- Add clear inline comments explaining the logic\n`;
+      if (mods.includes('Include unit tests')) prompt += `- Include comprehensive unit tests\n`;
+      if (mods.includes('Follow best practices')) prompt += `- Follow established best practices and design patterns\n`;
+      if (mods.includes('Production-ready code')) prompt += `- Make the code production-ready with proper error handling and edge cases\n`;
+      if (mods.length === 0) prompt += `- Use the most appropriate language/framework\n- Add inline comments\n- Follow best practices with proper error handling\n`;
+      break;
+
+    case 'architecture':
+      prompt += `Design a system architecture for the following:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      if (mods.includes('System design overview')) prompt += `- Provide a comprehensive system design overview with component diagrams\n`;
+      if (mods.includes('Trade-offs analysis')) prompt += `- Analyze trade-offs between different approaches\n`;
+      if (mods.includes('Scalability focus')) prompt += `- Focus on horizontal and vertical scalability strategies\n`;
+      if (mods.includes('Security considerations')) prompt += `- Include security considerations and threat mitigation\n`;
+      if (mods.includes('Cost optimization')) prompt += `- Address cost optimization and resource efficiency\n`;
+      if (mods.length === 0) prompt += `- Include system design overview with trade-offs\n- Address scalability and security considerations\n`;
+      break;
+
+    case 'debugging':
+      prompt += `Help me debug and resolve the following issue:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      if (mods.includes('Step-by-step diagnosis')) prompt += `- Walk through the diagnosis step by step\n`;
+      if (mods.includes('Root cause analysis')) prompt += `- Perform a root cause analysis\n`;
+      if (mods.includes('Suggest fixes')) prompt += `- Suggest concrete fixes with code examples\n`;
+      if (mods.includes('Prevention strategies')) prompt += `- Include prevention strategies for the future\n`;
+      if (mods.includes('Error context')) prompt += `- Consider the broader error context and related issues\n`;
+      if (mods.length === 0) prompt += `- Step-by-step diagnosis with root cause analysis\n- Provide concrete fix suggestions\n`;
+      break;
+
+    case 'learning':
+      prompt += `Create a comprehensive learning path for the following:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      if (mods.includes('Beginner to Expert roadmap')) prompt += `- Structure as a beginner-to-expert roadmap with clear milestones\n`;
+      if (mods.includes('Include resources')) prompt += `- Include specific learning resources (books, courses, tutorials)\n`;
+      if (mods.includes('Timeline estimate')) prompt += `- Provide realistic timeline estimates for each phase\n`;
+      if (mods.includes('Hands-on projects')) prompt += `- Suggest hands-on projects for practical application\n`;
+      if (mods.includes('Prerequisites listed')) prompt += `- Clearly list prerequisites for each stage\n`;
+      if (mods.length === 0) prompt += `- Beginner-to-expert roadmap with timeline estimates\n- Include resources and hands-on projects\n`;
+      break;
+
+    // ── Psychology ──
+    case 'behavioral':
+      prompt += `Provide a behavioral analysis of the following:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      mods.forEach(m => { prompt += `- ${m}\n`; });
+      if (mods.length === 0) prompt += `- Include relevant cognitive biases and case studies\n- Provide actionable insights with scientific references\n`;
+      break;
+
+    case 'self-improve':
+      prompt += `Create a practical self-improvement plan for the following:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      mods.forEach(m => { prompt += `- ${m}\n`; });
+      if (mods.length === 0) prompt += `- Provide actionable steps with habit formation strategies\n- Include daily routines and progress tracking methods\n`;
+      break;
+
+    case 'communication':
+      prompt += `Provide expert guidance on the following communication challenge:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      mods.forEach(m => { prompt += `- ${m}\n`; });
+      if (mods.length === 0) prompt += `- Include persuasion techniques and empathy mapping\n- Cover conflict resolution and active listening strategies\n`;
+      break;
+
+    case 'decisions':
+      prompt += `Help me make a well-informed decision about the following:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      mods.forEach(m => { prompt += `- ${m}\n`; });
+      if (mods.length === 0) prompt += `- Use a decision framework with pros & cons\n- Apply second-order thinking and relevant mental models\n`;
+      break;
+
+    // ── General Knowledge ──
+    case 'explain':
+      prompt += `Explain the following concept in a clear, comprehensive way:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      mods.forEach(m => { prompt += `- ${m}\n`; });
+      if (mods.length === 0) prompt += `- Use concrete examples and multiple perspectives\n- Include historical context and simplified summary\n`;
+      break;
+
+    case 'compare':
+      prompt += `Provide a detailed comparison of the following:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      mods.forEach(m => { prompt += `- ${m}\n`; });
+      if (mods.length === 0) prompt += `- Use table format with pros & cons\n- Include use-case scenarios and a clear recommendation\n`;
+      break;
+
+    case 'summarize':
+      prompt += `Summarize the following in a clear, structured way:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      mods.forEach(m => { prompt += `- ${m}\n`; });
+      if (mods.length === 0) prompt += `- Provide key takeaways as bullet points\n- Include an executive summary and action items\n`;
+      break;
+
+    case 'research':
+      prompt += `Conduct deep research on the following topic:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      mods.forEach(m => { prompt += `- ${m}\n`; });
+      if (mods.length === 0) prompt += `- Cite sources and present multiple perspectives\n- Include data-driven insights and recent developments\n`;
+      break;
+
+    // ── LinkedIn ──
+    case 'connection':
+      prompt += `Write a LinkedIn connection request message for the following scenario:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      mods.forEach(m => { prompt += `- ${m}\n`; });
+      if (mods.length === 0) prompt += `- Keep it concise (under 300 characters)\n- Make it personal and reference shared context\n`;
+      if (state.linkedinContext) prompt += `\nContext / Job Description:\n${state.linkedinContext}\n`;
+      break;
+
+    case 'referral':
+      prompt += `Write a LinkedIn message asking for a job referral:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      mods.forEach(m => { prompt += `- ${m}\n`; });
+      if (mods.length === 0) prompt += `- Mention the specific role and highlight relevant experience\n- Keep it professional yet personal\n`;
+      if (state.linkedinContext) prompt += `\nContext / Job Description:\n${state.linkedinContext}\n`;
+      break;
+
+    case 'hr-review':
+      prompt += `Write a LinkedIn message to an HR/Hiring Manager asking them to review your profile:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      mods.forEach(m => { prompt += `- ${m}\n`; });
+      if (mods.length === 0) prompt += `- Highlight role fit and show company knowledge\n- Request a conversation, keep it brief and respectful\n`;
+      if (state.linkedinContext) prompt += `\nContext / Job Description:\n${state.linkedinContext}\n`;
+      break;
+
+    // ── Writing ──
+    case 'blog':
+      prompt += `Write a blog post about the following:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      mods.forEach(m => { prompt += `- ${m}\n`; });
+      if (mods.length === 0) prompt += `- SEO-friendly with structured headings\n- Include a compelling introduction and CTA\n`;
+      break;
+
+    case 'email':
+      prompt += `Draft an email for the following:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      mods.forEach(m => { prompt += `- ${m}\n`; });
+      if (mods.length === 0) prompt += `- Professional tone with clear subject line\n- Concise and actionable\n`;
+      break;
+
+    case 'social':
+      prompt += `Create social media content for the following:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      mods.forEach(m => { prompt += `- ${m}\n`; });
+      if (mods.length === 0) prompt += `- Platform-optimized with engagement hooks\n- Include relevant hashtags\n`;
+      break;
+
+    case 'creative':
+      prompt += `Write creative content for the following:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      mods.forEach(m => { prompt += `- ${m}\n`; });
+      if (mods.length === 0) prompt += `- Set appropriate mood and tone\n- Focus on character development and narrative structure\n`;
+      break;
+
+    // ── Default fallback ──
+    default:
+      prompt += `Provide a thorough, well-structured response to the following:\n\n"${q}"\n\n`;
+      prompt += `Requirements:\n`;
+      if (mods.length > 0) {
+        mods.forEach(m => { prompt += `- ${m}\n`; });
+      } else {
+        prompt += `- Be specific and provide concrete examples\n- Structure the response clearly with sections\n- Include actionable takeaways\n`;
+      }
+      break;
+  }
+
+  // Add output format guidance
+  prompt += `\nFormat your response with clear structure using headings, bullet points, or numbered lists where appropriate. Be thorough but concise.`;
+
+  return prompt.trim();
+}
+
+// ─── API Mode Build ─────────────────────────────────
+async function buildWithAPI() {
   const metaPrompt = buildMetaPrompt();
 
   try {
@@ -525,6 +773,7 @@ async function buildPrompt() {
     generatedPrompt.textContent = state.generatedPrompt;
     loadingSpinner.classList.add('hidden');
     outputContent.classList.remove('hidden');
+    hideApiKeyNudge();
   } catch (err) {
     loadingSpinner.classList.add('hidden');
     errorBox.classList.remove('hidden');
