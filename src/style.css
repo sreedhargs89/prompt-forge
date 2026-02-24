@@ -28,10 +28,11 @@
 body {
   font-family: var(--font);
   background: var(--bg);
-  color: var(--text);
+  color: #1a1a2e;
   line-height: 1.6;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  -webkit-text-fill-color: #1a1a2e;
 }
 
 /* ─── Selection ──────────────────────────────────── */
@@ -78,6 +79,7 @@ body {
   font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: -0.02em;
+  color: #1a1a2e;
 }
 
 .header-actions {
@@ -167,21 +169,21 @@ body {
   margin: 0 auto;
 }
 
-.hero-title-link {
-  text-decoration: none;
+.hero-learn-link {
   display: inline-block;
-  transition: transform 0.2s, filter 0.2s;
+  margin-top: 6px;
+  color: var(--accent);
+  -webkit-text-fill-color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: color 0.15s;
 }
 
-.hero-title-link:hover {
-  transform: scale(1.02);
-  filter: brightness(1.15);
-}
-
-.hero-title-link:hover .hero-title {
+.hero-learn-link:hover {
+  color: var(--accent-hover);
+  -webkit-text-fill-color: var(--accent-hover);
   text-decoration: underline;
-  text-underline-offset: 4px;
-  text-decoration-color: rgba(91, 63, 217, 0.3);
 }
 
 /* ─── Quick Build Items ──────────────────────────── */
@@ -442,6 +444,7 @@ body {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
+  -webkit-text-fill-color: #fff;
 }
 
 /* ─── Buttons ────────────────────────────────────── */
@@ -453,7 +456,8 @@ body {
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--bg-card);
-  color: var(--text);
+  color: #1a1a2e;
+  -webkit-text-fill-color: #1a1a2e;
   font-family: var(--font);
   font-size: 0.85rem;
   font-weight: 500;
@@ -474,7 +478,8 @@ body {
 .btn-ghost {
   background: transparent;
   border-color: transparent;
-  color: var(--text-dim);
+  color: #5c5f6a;
+  -webkit-text-fill-color: #5c5f6a;
 }
 
 .btn-ghost:hover {
@@ -486,6 +491,7 @@ body {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
+  -webkit-text-fill-color: #fff;
   font-weight: 600;
 }
 
