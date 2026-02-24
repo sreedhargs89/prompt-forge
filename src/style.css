@@ -167,6 +167,44 @@ body {
   margin: 0 auto;
 }
 
+/* ─── Quick Build Items ──────────────────────────── */
+.quick-build-item {
+  flex: 1 1 calc(50% - 8px);
+  min-width: 200px;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+}
+
+.quick-build-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.quick-build-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #1a1a2e;
+}
+
+.quick-build-desc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.quick-build-item.selected {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.quick-build-item.selected .quick-build-label {
+  color: var(--accent);
+}
+
 /* ─── Form Sections ──────────────────────────────── */
 .form-section {
   margin-bottom: 20px;

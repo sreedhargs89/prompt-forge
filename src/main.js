@@ -114,6 +114,46 @@ const CATEGORIES = [
   }
 ];
 
+// ─── Quick Build Presets ────────────────────────────
+const QUICK_BUILDS = [
+  {
+    id: 'tech-deep-dive',
+    label: '🚀 Tech Deep Dive',
+    desc: 'First principles · Examples & visuals · Technical Architect',
+    categoryId: 'technology',
+    subcategoryId: 'first-principles',
+    modifiers: ['Explain from scratch', 'Use analogies', 'Include visual descriptions'],
+    role: 'Technical Architect'
+  },
+  {
+    id: 'mindset-shift',
+    label: '🧠 Mindset Shift',
+    desc: 'Self-improvement · Actionable steps & habits · Psychologist',
+    categoryId: 'psychology',
+    subcategoryId: 'self-improve',
+    modifiers: ['Actionable steps', 'Habit formation', 'Mindset shifts'],
+    role: 'Psychologist'
+  },
+  {
+    id: 'linkedin-outreach',
+    label: '💼 LinkedIn Outreach',
+    desc: 'Connection request · Cold outreach & concise · Career Coach',
+    categoryId: 'linkedin',
+    subcategoryId: 'connection',
+    modifiers: ['Cold outreach', 'Same industry / role', 'Keep it concise (300 chars)'],
+    role: 'Career Coach'
+  },
+  {
+    id: 'research-compare',
+    label: '🌐 Research & Compare',
+    desc: 'Deep research · Cite sources & data-driven · Business Analyst',
+    categoryId: 'general',
+    subcategoryId: 'research',
+    modifiers: ['Cite sources', 'Multiple perspectives', 'Data-driven'],
+    role: 'Business Analyst'
+  }
+];
+
 // ─── State ──────────────────────────────────────────
 const state = {
   question: '',
@@ -124,6 +164,7 @@ const state = {
   selectedRole: '',
   customRole: '',
   generatedPrompt: '',
+  activeQuickBuild: null,
   apiKey: localStorage.getItem('promptforge_apikey') || '',
   archive: JSON.parse(localStorage.getItem('promptforge_archive') || '[]')
 };
@@ -140,6 +181,7 @@ const closeDrawerBtn = $('#closeDrawer');
 const archiveDrawer = $('#archiveDrawer');
 const archiveOverlay = $('#archiveOverlay');
 const archiveList = $('#archiveList');
+const quickBuildList = $('#quickBuildList');
 const categoryList = $('#categoryList');
 const subcategorySection = $('#subcategorySection');
 const subcategoryList = $('#subcategoryList');
@@ -162,8 +204,20 @@ const saveBtn = $('#saveBtn');
 const regenerateBtn = $('#regenerateBtn');
 const toast = $('#toast');
 
+// Manual form sections to hide/show for quick build
+const manualSections = () => [
+  categoryList.closest('.form-section'),
+  subcategorySection,
+  linkedinSection,
+  modifiersSection,
+  roleSection
+];
+
 // ─── Init ───────────────────────────────────────────
 function init() {
+  // Render quick build presets
+  renderQuickBuilds();
+
   // Render category radio buttons
   renderCategories();
 
@@ -176,6 +230,72 @@ function init() {
   }
 
   bindEvents();
+}
+
+// ─── Quick Build ────────────────────────────────────
+function renderQuickBuilds() {
+  quickBuildList.innerHTML = QUICK_BUILDS.map((qb) => `
+    <div class="radio-item quick-build-item" data-id="${qb.id}">
+      <div class="radio-dot"></div>
+      <div class="quick-build-content">
+        <span class="quick-build-label">${qb.label}</span>
+        <span class="quick-build-desc">${qb.desc}</span>
+      </div>
+    </div>
+  `).join('');
+
+  quickBuildList.querySelectorAll('.radio-item').forEach((el) => {
+    el.addEventListener('click', () => {
+      const qbId = el.dataset.id;
+      const qb = QUICK_BUILDS.find((q) => q.id === qbId);
+
+      if (state.activeQuickBuild === qbId) {
+        // Deselect — restore manual mode
+        state.activeQuickBuild = null;
+        state.selectedCategory = null;
+        state.selectedSubcategory = null;
+        state.selectedModifiers = [];
+        state.selectedRole = '';
+        state.customRole = '';
+        el.classList.remove('selected');
+        showManualSections();
+        return;
+      }
+
+      // Select this preset
+      state.activeQuickBuild = qbId;
+      state.selectedCategory = CATEGORIES.find((c) => c.id === qb.categoryId);
+      state.selectedSubcategory = state.selectedCategory.subcategories.find((s) => s.id === qb.subcategoryId);
+      state.selectedModifiers = [...qb.modifiers];
+      state.selectedRole = qb.role;
+      state.customRole = '';
+
+      // Update visual — only one selected
+      quickBuildList.querySelectorAll('.radio-item').forEach((r) => r.classList.remove('selected'));
+      el.classList.add('selected');
+
+      // Hide manual sections
+      hideManualSections();
+    });
+  });
+}
+
+function hideManualSections() {
+  manualSections().forEach((s) => {
+    if (s) s.classList.add('hidden');
+  });
+}
+
+function showManualSections() {
+  // Only show category section; the rest appear on interaction
+  const catSection = categoryList.closest('.form-section');
+  if (catSection) catSection.classList.remove('hidden');
+  // Reset category selection visuals
+  categoryList.querySelectorAll('.radio-item').forEach((r) => r.classList.remove('selected'));
+  hideSection(subcategorySection);
+  hideSection(linkedinSection);
+  hideSection(modifiersSection);
+  hideSection(roleSection);
 }
 
 function renderCategories() {
@@ -192,6 +312,12 @@ function renderCategories() {
       state.selectedCategory = CATEGORIES.find((c) => c.id === catId);
       state.selectedSubcategory = null;
       state.selectedModifiers = [];
+
+      // Deselect quick build if active
+      if (state.activeQuickBuild) {
+        state.activeQuickBuild = null;
+        quickBuildList.querySelectorAll('.radio-item').forEach((r) => r.classList.remove('selected'));
+      }
 
       // Update selection visual
       categoryList.querySelectorAll('.radio-item').forEach((r) => r.classList.remove('selected'));
